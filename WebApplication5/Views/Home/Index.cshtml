@@ -1,0 +1,208 @@
+﻿@{
+    ViewBag.Title = "ChatView";
+}
+<br />
+<br />
+<div class="container-fluid">
+    <div id='chatcontainer' class="row">
+        <div class="friendsList col-5">
+        </div>
+        <div class="requests-field" id="requests">
+            <div class="friendRequest">
+
+            </div>
+        </div>
+        <div class="typing-message-panel col-6" style="display:none;">
+            <div class="row">
+                <div class="panel panel-default" style="width:100%; height:300px; max-height:300px;" >
+                    <h4 class="chat-title">Chat with:</h4> <hr />
+                    <div class="panel-body">
+                        <ul id="chatdialog"></ul>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row inputPanel">
+                <br /><br />
+                <input type="text" id="message" style="width: 100%;" />
+            </div>
+            <div class="row inputPanel">
+                <button class="btn btn-success" data-id="" data-userid="" data-name="" id="broadcast">send</button>
+                <br /><br />
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="~/Scripts/jquery.signalR-2.1.2.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script>
+        var chat = $.connection.chatHub;
+        $(document).ready(function () {
+
+            chat.client.showUsers = function (lst) {
+                console.log("showUsersClient");
+                var users = "";
+                lst.forEach(function (item, i, lst) {
+                    users += `
+                                <div class="row">
+                                    <div class="col-6 chatbox" data-id='${item.ConnectionId}' data-userid='${item.UserId}' data-status='${item.Status}' data-username='${item.UserName}'>
+                                            <div class="user-item">
+                                                <p class="status">${(item.Status ? 'online' : 'offline')}</p>
+                                                <p>${item.UserName}</p>
+                                            </div>
+                                    </div>
+                                    <div class="buttons col">
+                                        <br />
+
+                                    </div>
+                                </div> `;
+                });
+                $('.friendsList').html(users);
+            }
+
+            $(document).on('click',
+                '.chatbox',
+                function () {
+                    openInfo();
+                });
+
+            $(document).on('click',
+                ".to-friends-btn", function () {
+                    sendRequest();
+                });
+
+            $(document).on('click',
+                ".acceptBtn",
+                function () {
+                    console.log("acceptBtn");
+                    acceptRequest();
+                });
+
+           
+            chat.client.sendRequestTo = function (fromUserName, reqId) {
+                console.log("sendRequestClient");
+                $('#chatdialog').append(`<div class="friendRequest">
+                                                <h5>New Friend ${fromUserName}</h5>
+                                                    <button data-answer=1 data-id='${reqId}' data-from='${fromUserName}'
+                                                        class="btn btn-success acceptBtn">accept</button>
+                                                    <button data-answer=0 data-id='${reqId}'
+                                                        data-from='${fromUserName}' class="btn btn-danger acceptBtn">decline</button>
+                                                    </div>`);
+                console.log("sendRequestClientAfter");
+            };
+
+            chat.client.sendPrivate = function (id, msg, name) {
+                console.log("sendPrivateClient");
+                $('#chatdialog').append('<li>' + $('#message').val() + '</li>');
+                $('#message').val("");
+            };
+
+            $(document).on('click',
+                ".write-message-btn", function () {
+                    console.log("write-message-btn");
+
+                    writeMessagePanel();
+                });
+            $(document).on('click',
+                ".messages-btn", function () {
+                    console.log("showHistory");
+
+                    showHistory();
+                });
+
+            chat.client.openChat = function (id) {
+                console.log("openChatClient");
+
+                $("#broadcast").data('id', id);
+                $(".typing-message-panel").slideDown();
+                $(".chat-title").text("privat chat");
+                $("#chatdialog").html('');
+            };
+
+            chat.client.sendHistory = function (messages) {
+                console.log("sendHistoryClient");
+                $(".typing-message-panel").slideDown();
+                $("#chatdialog").append(messages);
+                $(".inputPanel").slideUp();
+            };
+
+            $('#broadcast').click(function () {
+                chat.client.sendPrivate = function (id, msg, name) {
+                    console.log("sendPrivateClient");
+                    console.log(id);
+                    $('#chatdialog').append('<li>' + $('#message').val() + '</li>');
+                    $('#message').val("");
+                };
+                
+            });
+
+            $('#message').change(function () {
+                console.log("typeMessageWork");
+                typeMessage();
+            });
+
+            $.connection.hub.start(function () {
+
+            });
+
+            
+
+        });
+        
+        function openInfo() {
+            var $this = $(".chatbox"),
+                conId = $this.data('id'),
+                userid = $this.data('userid'),
+                userName = $this.data('username');
+            var buttons = `<br /><input type="button" data-userid="${userid}"  data-username="${userName}" data-conId="${conId}" value="To Friends" class="to-friends-btn btn btn-success" /><br />
+    <input type="button" data-username="${userName}" data-conId="${conId}" value="Messages" class="messages-btn btn btn-danger" /><br />
+                                        <input type="button" data-username="${userName}" data-conId="${conId}" data-userid="${userid}" value="Write message" class="write-message-btn btn btn-warning" disabled/>`;
+
+            $(".buttons").html(buttons);
+        }
+
+        function sendRequest() {
+
+            var $this = $(".to-friends-btn"),
+                conid = $this.data('conId');
+            $(".write-message-btn").removeAttr('disabled');
+
+            chat.server.sendRequest(conid);
+        }
+
+        function showHistory() {
+            console.log("showHistory");
+
+            var $this = $(".messages-btn"),
+                userName = $this.data('username');
+            chat.server.historyShow(userName);
+        }
+
+        function writeMessagePanel() {
+            console.log("showPrivateChat");
+
+            var Id = $(".chatbox").data('id');
+            chat.server.showPrivateChat(Id);
+        }
+        function acceptRequest() {
+            console.log("acceptRequest");
+
+            var $this = $(".acceptBtn"),
+                id = $this.data('id'),
+                fromId = $this.data('fromid'),
+                toId = $this.data('toid'),
+                answer = $this.data('answer');
+
+            chat.server.answer(id, fromId, toId, answer);
+        }
+        
+        function typeMessage() {
+
+            var id = $("#broadcast").data('id');
+            console.log(id);
+            chat.server.sendPrivateToServer(id, $('#message').val());
+        }
+    </script>
+}

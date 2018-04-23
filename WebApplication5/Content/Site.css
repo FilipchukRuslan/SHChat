@@ -1,0 +1,57 @@
+﻿
+body{
+    margin:0 auto;
+    padding:0;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+li:nth-child(odd) {
+    background-color: #b6ff00;
+    list-style-type: none;
+}
+
+li:nth-child(even) {
+    background-color: #ffd800;
+    text-align: right;
+    list-style-type: none;
+}
+
+#userslst {
+    background-color: #ededed;
+    font-size: 18px;
+    text-align: left;
+}
+
+.user-item {
+    padding: 10px;
+    text-align: center;
+    background: linear-gradient(#99fbcb,white, #99fbcb);
+    font-size: 15px;
+}
+.user-item:hover {
+    background: #ffd800;
+    cursor:pointer;
+    font-size:16px;
+}
+.chatbox {
+    padding: 10px;
+}
