@@ -35,38 +35,50 @@ namespace WebApplication5.Hubs
             {
                 ConnectedClientsList = new List<UserDTO>();
             }
-            var user = ConnectedClientsList.Find(c => c.UserId == Context.User.Identity.GetUserId());
-            if (Context.User.Identity.Name.Count() != 0 && user==null)
+            try
             {
-                ConnectedClientsList.Add(new UserDTO
-                {
-                    UserName = Context.User.Identity.Name,
-                    ConnectionId = Context.ConnectionId,
-                    UserId = Context.User.Identity.GetUserId(),
-                    Status = true
-                });
-            }
+                var user = ConnectedClientsList.Find(c => c.UserId == Context.User.Identity.GetUserId());
+                user.ConnectionId = Context.ConnectionId;
+                user.Status = true;
 
-            ChatUsers();
+            }
+            catch (Exception ex)
+            {
+                if (Context.User.Identity.Name.Count() > 1)
+                {
+                    ConnectedClientsList.Add(new UserDTO
+                    {
+                        UserName = Context.User.Identity.Name,
+                        ConnectionId = Context.ConnectionId,
+                        UserId = Context.User.Identity.GetUserId(),
+                        Status = true
+                    });
+                }
+            }
+            finally
+            {
+                ChatUsers();
+            }
             return base.OnConnected();
         }
-
-        public void Send(string message)
-        {
-            Clients.All.message(Context.User.Identity.GetUserName() + " " + message);
-
-        }
-
+        
 
         public override Task OnDisconnected(bool endConnection)
         {
-            var user = ConnectedClientsList.Find(c => c.ConnectionId == Context.ConnectionId);
-
-            if (user.UserName.Count() <= 1)
-                ConnectedClientsList.Remove(user);
-            else
+            try
+            {
+                var user = ConnectedClientsList.Find(c => c.UserId == Context.User.Identity.GetUserId());
                 user.Status = false;
-            Clients.All.showUsers(ConnectedClientsList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                Clients.All.showUsers(ConnectedClientsList);
+            }
+            
             return base.OnDisconnected(endConnection);
         }
 

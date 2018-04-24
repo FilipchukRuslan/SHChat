@@ -70,6 +70,7 @@
 
             $(document).on('click',
                 ".to-friends-btn", function () {
+                    $('.typing-message-panel').slideDown();
                     sendRequest();
                 });
 
@@ -153,22 +154,19 @@
         
         function openInfo() {
             var $this = $(".chatbox"),
-                conId = $this.data('id'),
+                conid = $this.data('id'),
                 userid = $this.data('userid'),
                 userName = $this.data('username');
-            var buttons = `<br /><input type="button" data-userid="${userid}"  data-username="${userName}" data-conId="${conId}" value="To Friends" class="to-friends-btn btn btn-success" /><br />
-    <input type="button" data-username="${userName}" data-conId="${conId}" value="Messages" class="messages-btn btn btn-danger" /><br />
-                                        <input type="button" data-username="${userName}" data-conId="${conId}" data-userid="${userid}" value="Write message" class="write-message-btn btn btn-warning" disabled/>`;
+            var buttons = `<br /><input type="button" data-userid="${userid}"  data-username="${userName}" data-conid="${conid}" value="To Friends" class="to-friends-btn btn btn-success" /><br />
+    <input type="button" data-username="${userName}" data-conid="${conid}" value="Messages" class="messages-btn btn btn-danger" /><br />
+                                        <input type="button" data-username="${userName}" data-conid="${conid}" data-userid="${userid}" value="Write message" class="write-message-btn btn btn-warning" disabled/>`;
 
             $(".buttons").html(buttons);
         }
 
         function sendRequest() {
-
             var $this = $(".to-friends-btn"),
-                conid = $this.data('conId');
-            $(".write-message-btn").removeAttr('disabled');
-
+                conid = $this.data('conid');
             chat.server.sendRequest(conid);
         }
 
@@ -183,8 +181,8 @@
         function writeMessagePanel() {
             console.log("showPrivateChat");
 
-            var Id = $(".chatbox").data('id');
-            chat.server.showPrivateChat(Id);
+            var id = $(".chatbox").data('id');
+            chat.server.showPrivateChat(id);
         }
         function acceptRequest() {
             console.log("acceptRequest");
@@ -194,7 +192,7 @@
                 fromId = $this.data('fromid'),
                 toId = $this.data('toid'),
                 answer = $this.data('answer');
-
+            $(".write-message-btn").removeAttr('disabled');
             chat.server.answer(id, fromId, toId, answer);
         }
         
