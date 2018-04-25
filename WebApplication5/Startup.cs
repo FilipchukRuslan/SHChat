@@ -13,9 +13,6 @@ namespace WebApplication5
     {
         public void Configuration(IAppBuilder app)
         {
-            //
-
-
             GlobalHost.DependencyResolver.Register(
                 typeof(ChatHub),
                 () => new ChatHub(new UnitOfWork(new ApplicationDbContext())));

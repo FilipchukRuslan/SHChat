@@ -215,13 +215,15 @@
     </Compile>
     <Compile Include="Hubs\ChatHub.cs" />
     <Compile Include="Interfaces\IBaseRepository.cs" />
-    <Compile Include="Interfaces\IChatRepository.cs" />
     <Compile Include="Interfaces\IUnitOfWork.cs" />
     <Compile Include="IoC\NinjectRegistrations.cs" />
-    <Compile Include="IoC\NinjectSignalRDependencyResolver.cs" />
     <Compile Include="Migrations\201804182204304_MyDbC.cs" />
     <Compile Include="Migrations\201804182204304_MyDbC.Designer.cs">
       <DependentUpon>201804182204304_MyDbC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201804250920273_updInit.cs" />
+    <Compile Include="Migrations\201804250920273_updInit.Designer.cs">
+      <DependentUpon>201804250920273_updInit.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -230,7 +232,6 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\Message.cs" />
-    <Compile Include="Models\User.cs" />
     <Compile Include="Models\UserDTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\BaseRepositiry.cs" />
@@ -316,6 +317,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201804182204304_MyDbC.resx">
       <DependentUpon>201804182204304_MyDbC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201804250920273_updInit.resx">
+      <DependentUpon>201804250920273_updInit.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
