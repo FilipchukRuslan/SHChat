@@ -17,11 +17,7 @@ namespace WebApplication5.Hubs
 {
     public class ChatHub : Hub
     {
-
-
-
         private static List<UserDTO> ConnectedClientsList;
-        private static List<Message> Messages = new List<Message>();
 
         private IUnitOfWork unitOfWork;
 
@@ -29,6 +25,8 @@ namespace WebApplication5.Hubs
         {
             unitOfWork = unitofwork;
         }
+
+        [Authorize]
         public override Task OnConnected()
         {
             if (ConnectedClientsList == null)
@@ -40,7 +38,7 @@ namespace WebApplication5.Hubs
                 var user = ConnectedClientsList.Find(c => c.UserId == Context.User.Identity.GetUserId());
                 user.ConnectionId = Context.ConnectionId;
                 user.Status = true;
-
+                ChatUsers();
             }
             catch (Exception ex)
             {
@@ -53,16 +51,13 @@ namespace WebApplication5.Hubs
                         UserId = Context.User.Identity.GetUserId(),
                         Status = true
                     });
+                    ChatUsers();
                 }
-            }
-            finally
-            {
-                ChatUsers();
             }
             return base.OnConnected();
         }
-        
 
+        [Authorize]
         public override Task OnDisconnected(bool endConnection)
         {
             try
@@ -78,39 +73,52 @@ namespace WebApplication5.Hubs
             {
                 Clients.All.showUsers(ConnectedClientsList);
             }
-            
             return base.OnDisconnected(endConnection);
         }
-
+        [Authorize]
         public void ChatUsers()
         {
             Clients.All.showUsers(ConnectedClientsList);
         }
 
-
+        [Authorize]
         public void SendPrivateToServer(string userConnectionId, string message)
         {
-            Messages.Add(new Message
+            var toUser = ConnectedClientsList.Where(e => e.ConnectionId == userConnectionId).First().UserName;
+            var fromUser = Context.User.Identity.Name;
+            unitOfWork.MessagesRepo.Insert(new Message
             {
-                FromUser = Context.User.Identity.Name,
-                MessageText = message
+                FromUser = fromUser,
+                MessageText = message,
+                ToUser = toUser
             });
-            Clients.Client(userConnectionId).sendPrivate(message);
+            try
+            {
+                var friendShip = unitOfWork.FriendsRepo.Get()
+                    .Where(u => u.User == fromUser && u.Friend == toUser).First();
+                Clients.Client(userConnectionId).sendPrivate(message, toUser);
+            }
+            catch(Exception ex)
+            {
+
+            }
+            
         }
+        [Authorize]
         public void ShowPrivateChat(string userConnectionId)
         {
             Clients.Caller.openChat(userConnectionId);
         }
+        [Authorize]
         public void HistoryShow(string from)
         {
-            var messages = Messages.Where(e => e.FromUser == from && e.ToUser == Context.User.Identity.Name);
+            var messages = unitOfWork.MessagesRepo.Get().Where(e => e.FromUser == from && e.ToUser == Context.User.Identity.Name);
             Clients.Caller.sendHistory(messages);
         }
-
-        public void SendRequest(string toId)
+        [Authorize]
+        public void SendRequest(string toIdCon)
         {
-            var user = unitOfWork.UsersRepo.GetAll().ToList()
-                .Find(c => c.Email == ConnectedClientsList.Find(a => a.ConnectionId == toId).UserName).Id;
+            var user = ConnectedClientsList.Where(e => e.ConnectionId == toIdCon).First().UserName;
             FriendRequest req = new FriendRequest
             {
                 FromUser = Context.User.Identity.GetUserId(),
@@ -120,27 +128,25 @@ namespace WebApplication5.Hubs
             unitOfWork.UsersRepo
                 .GetAll()
                 .ToList()
-                .Find(c => c.Email == ConnectedClientsList.Find(a => a.ConnectionId == toId).UserName)
+                .Find(c => c.Email == ConnectedClientsList.Find(a => a.ConnectionId == toIdCon).UserName)
                 .FriendRequests.Add(req);
             unitOfWork.Save();
             var reqId = unitOfWork.RequestsRepo.GetAll().ToList().Find(c => c.FromUser == req.FromUser && c.ToUser == req.ToUser).Id;
-            Clients.Client(toId).sendRequestTo(req.FromUser, reqId);
+            Clients.Client(toIdCon).sendRequestTo(req.FromUser, reqId);
 
         }
 
-
+        [Authorize]
         public void Answer(string friendName, int reqId, bool answer)
         {
             if (answer)
             {
-                FriendShip user = new FriendShip
+                FriendShip friendShip = new FriendShip
                 {
                     User = Context.User.Identity.Name,
                     Friend = friendName
                 };
-                unitOfWork.FriendsRepo.Insert(user);
-                var delreq = unitOfWork.RequestsRepo.GetById(reqId);
-                unitOfWork.RequestsRepo.Delete(delreq);
+                unitOfWork.FriendsRepo.Insert(friendShip);
                 unitOfWork.Save();
             }
             else
@@ -149,9 +155,6 @@ namespace WebApplication5.Hubs
                 unitOfWork.RequestsRepo.Delete(delreq);
                 unitOfWork.Save();
             }
-
         }
-
-
     }
 }

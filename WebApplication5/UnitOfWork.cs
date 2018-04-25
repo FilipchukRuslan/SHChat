@@ -16,6 +16,7 @@ namespace WebApplication5
         private IBaseRepository<FriendRequest> requestsRepo;
         private IBaseRepository<ApplicationUser> usersRepo;
         private IBaseRepository<FriendShip> friendsRepo;
+        private IBaseRepository<Message> messagesRepo;
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -46,6 +47,15 @@ namespace WebApplication5
             {
                 if (friendsRepo == null) { friendsRepo = new BaseRepository<FriendShip>(context); }
                 return friendsRepo;
+            }
+        }
+
+        public IBaseRepository<Message> MessagesRepo
+        {
+            get
+            {
+                if (messagesRepo == null) { messagesRepo = new BaseRepository<Message>(context); }
+                return messagesRepo;
             }
         }
 

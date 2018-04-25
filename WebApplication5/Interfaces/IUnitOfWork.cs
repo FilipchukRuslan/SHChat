@@ -14,6 +14,7 @@ namespace WebApplication5.Interfaces
         IBaseRepository<ApplicationUser> UsersRepo { get; }
         IBaseRepository<FriendRequest> RequestsRepo { get; }
         IBaseRepository<FriendShip> FriendsRepo { get; }
+        IBaseRepository<Message> MessagesRepo { get; }
         int Save();
     }
 }

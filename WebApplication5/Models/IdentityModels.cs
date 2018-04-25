@@ -7,13 +7,17 @@ using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace WebApplication5.Models
 {
-    // You can add profile data for the user by adding more properties to your ApplicationUser class, please visit https://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
-    public class ApplicationUser : IdentityUser
+     public class ApplicationUser : IdentityUser
     {
+        public virtual ICollection<FriendRequest> FriendRequests { get; set; }
+        public virtual ICollection<FriendShip> Friendships { get; set; }
+        public virtual ICollection<Message> Messages { get; set; }
+
         public ApplicationUser()
         {
             FriendRequests = new HashSet<FriendRequest>();
             Friendships = new HashSet<FriendShip>();
+            Messages = new HashSet<Message>();
         }
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
@@ -22,12 +26,14 @@ namespace WebApplication5.Models
             // Add custom user claims here
             return userIdentity;
         }
-        public virtual ICollection<FriendRequest> FriendRequests { get; set; }
-        public virtual ICollection<FriendShip> Friendships { get; set; }
     }
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public virtual DbSet<FriendRequest> FriendRequests { get; set; }
+        public virtual DbSet<FriendShip> Friendships { get; set; }
+        public virtual DbSet<Message> Messages { get; set; }
+
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {
@@ -37,7 +43,5 @@ namespace WebApplication5.Models
         {
             return new ApplicationDbContext();
         }
-        public virtual DbSet<FriendRequest> FriendRequests { get; set; }
-        public virtual DbSet<FriendShip> Friendships { get; set; }
     }
 }

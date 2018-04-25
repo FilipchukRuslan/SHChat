@@ -14,7 +14,7 @@
         </div>
         <div class="typing-message-panel col-6" style="display:none;">
             <div class="row">
-                <div class="panel panel-default" style="width:100%; height:300px; max-height:300px;" >
+                <div class="panel panel-default" style="width:100%; height:300px; max-height:300px;">
                     <h4 class="chat-title">Chat with:</h4> <hr />
                     <div class="panel-body">
                         <ul id="chatdialog"></ul>
@@ -46,18 +46,18 @@
                 var users = "";
                 lst.forEach(function (item, i, lst) {
                     users += `
-                                <div class="row">
-                                    <div class="col-6 chatbox" data-id='${item.ConnectionId}' data-userid='${item.UserId}' data-status='${item.Status}' data-username='${item.UserName}'>
-                                            <div class="user-item">
-                                                <p class="status">${(item.Status ? 'online' : 'offline')}</p>
-                                                <p>${item.UserName}</p>
-                                            </div>
-                                    </div>
-                                    <div class="buttons col">
-                                        <br />
+                                    <div class="row">
+                                        <div class="col-6 chatbox" data-id='${item.ConnectionId}' data-userid='${item.UserId}' data-status='${item.Status}' data-username='${item.UserName}'>
+                                                <div class="user-item">
+                                                    <p class="status">${(item.Status ? 'online' : 'offline')}</p>
+                                                    <p>${item.UserName}</p>
+                                                </div>
+                                        </div>
+                                        <div class="buttons col">
+                                            <br />
 
-                                    </div>
-                                </div> `;
+                                        </div>
+                                    </div> `;
                 });
                 $('.friendsList').html(users);
             }
@@ -81,22 +81,25 @@
                     acceptRequest();
                 });
 
-           
+
             chat.client.sendRequestTo = function (fromUserName, reqId) {
                 console.log("sendRequestClient");
                 $('#chatdialog').append(`<div class="friendRequest">
-                                                <h5>New Friend ${fromUserName}</h5>
-                                                    <button data-answer=1 data-id='${reqId}' data-from='${fromUserName}'
-                                                        class="btn btn-success acceptBtn">accept</button>
-                                                    <button data-answer=0 data-id='${reqId}'
-                                                        data-from='${fromUserName}' class="btn btn-danger acceptBtn">decline</button>
-                                                    </div>`);
+                                                    <h5>New Friend ${fromUserName}</h5>
+                                                        <button data-answer=1 data-id='${reqId}' data-from='${fromUserName}'
+                                                            class="btn btn-success acceptBtn">accept</button>
+                                                        <button data-answer=0 data-id='${reqId}'
+                                                            data-from='${fromUserName}' class="btn btn-danger acceptBtn">decline</button>
+                                                        </div>`);
                 console.log("sendRequestClientAfter");
             };
 
-            chat.client.sendPrivate = function (id, msg, name) {
+            chat.client.sendPrivate = function (msg, name) {
                 console.log("sendPrivateClient");
-                $('#chatdialog').append('<li>' + $('#message').val() + '</li>');
+                $('#chatdialog').append('<li>' + `<div class="row">
+        <div class="col">${name}</div>
+        <div class="col">${msg}</div>
+        </div>` + '</li>');
                 $('#message').val("");
             };
 
@@ -114,16 +117,15 @@
                 });
 
             chat.client.openChat = function (id) {
-                console.log("openChatClient");
 
-                $("#broadcast").data('id', id);
                 $(".typing-message-panel").slideDown();
+                $(".inputPanel").slideDown();
+                $("#broadcast").data('id', id);
                 $(".chat-title").text("privat chat");
                 $("#chatdialog").html('');
             };
 
             chat.client.sendHistory = function (messages) {
-                console.log("sendHistoryClient");
                 $(".typing-message-panel").slideDown();
                 $("#chatdialog").append(messages);
                 $(".inputPanel").slideUp();
@@ -136,11 +138,10 @@
                     $('#chatdialog').append('<li>' + $('#message').val() + '</li>');
                     $('#message').val("");
                 };
-                
+
             });
 
             $('#message').change(function () {
-                console.log("typeMessageWork");
                 typeMessage();
             });
 
@@ -148,18 +149,18 @@
 
             });
 
-            
+
 
         });
-        
+
         function openInfo() {
             var $this = $(".chatbox"),
                 conid = $this.data('id'),
                 userid = $this.data('userid'),
                 userName = $this.data('username');
             var buttons = `<br /><input type="button" data-userid="${userid}"  data-username="${userName}" data-conid="${conid}" value="To Friends" class="to-friends-btn btn btn-success" /><br />
-    <input type="button" data-username="${userName}" data-conid="${conid}" value="Messages" class="messages-btn btn btn-danger" /><br />
-                                        <input type="button" data-username="${userName}" data-conid="${conid}" data-userid="${userid}" value="Write message" class="write-message-btn btn btn-warning" disabled/>`;
+        <input type="button" data-username="${userName}" data-conid="${conid}" value="Messages" class="messages-btn btn btn-danger" /><br />
+                                            <input type="button" data-username="${userName}" data-conid="${conid}" data-userid="${userid}" value="Write message" class="write-message-btn btn btn-warning" disabled/>`;
 
             $(".buttons").html(buttons);
         }
@@ -195,7 +196,7 @@
             $(".write-message-btn").removeAttr('disabled');
             chat.server.answer(id, fromId, toId, answer);
         }
-        
+
         function typeMessage() {
 
             var id = $("#broadcast").data('id');
